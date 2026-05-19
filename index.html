@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voice Lock</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    text-align: center;
+  }
+ .box {
+    background: rgba(255,255,255,0.1);
+    padding: 40px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+  }
+  button {
+    padding: 15px 30px;
+    font-size: 18px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background: white;
+    color: #667eea;
+    margin-top: 20px;
+  }
+ .status {
+    margin-top: 20px;
+    font-size: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="box">
+  <h1>🔒 Voice Lock</h1>
+  <p>"Open" ya "Zia" bolo site unlock karne ke liye</p>
+  <button id="startBtn">🎤 Mic On Karo</button>
+  <div class="status" id="status">Mic band hai</div>
+</div>
+
+<script>
+const status = document.getElementById('status');
+const startBtn = document.getElementById('startBtn');
+const SECRET_WORD = "open"; // Yahan apna password word likh do
+
+// Check if browser supports speech recognition
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if (!SpeechRecognition) {
+  status.textContent = "Tumhara browser voice support nahi karta. Chrome use karo.";
+  startBtn.disabled = true;
+} else {
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'en-US'; // Urdu ke liye 'ur-PK' try kar sakte ho
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  startBtn.addEventListener('click', () => {
+    recognition.start();
+    status.textContent = "Sun raha hun... bolo";
+  });
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript.toLowerCase();
+    status.textContent = `Tumne bola: "${transcript}"`;
+
+    if (transcript.includes(SECRET_WORD)) {
+      status.textContent = "✅ Sahi! Unlock ho gaya";
+      document.body.style.background = "linear-gradient(135deg, #00c9ff, #92fe9d)";
+
+      // 2 sec baad dashboard par le jao
+      setTimeout(() => {
+        window.location.href = "dashboard.html";
+      }, 2000);
+    } else {
+      status.textContent = "❌ Galat word. Dobara try karo";
+    }
+  };
+
+  recognition.onerror = (event) => {
+    status.textContent = "Error: " + event.error;
+  };
+
+  recognition.onend = () => {
+    startBtn.textContent = "🎤 Dobara Try Karo";
+  };
+}
+</script>
+
+</body>
+  </html>
