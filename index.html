@@ -3,115 +3,231 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Weather Pro</title>
+<title>Weather X Infinity</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;600;700&display=swap');
 
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+:root {
+  --glass: rgba(255, 255, 255, 0.07);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --text: #fff;
+  --subtext: #a1a1aa;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Clash Display', sans-serif; }
 
 body {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #000;
+  color: var(--text);
   min-height: 100vh;
+  overflow-x: hidden;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   padding: 20px;
+  transition: background 2s ease;
+}
+
+/* Dynamic Weather Background */
+#weather-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: -1;
 }
 
 .app {
   width: 100%;
   max-width: 450px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  border-radius: 25px;
+  background: var(--glass);
+  backdrop-filter: blur(50px) saturate(180%);
+  -webkit-backdrop-filter: blur(50px) saturate(180%);
+  border-radius: 35px;
   padding: 30px;
-  border: 1px solid rgba(255,255,255,0.2);
-  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 0 120px rgba(139, 92, 246, 0.3);
+  animation: enter 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes enter {
+  from { opacity: 0; transform: translateY(50px) scale(0.9); filter: blur(20px); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
 }
 
 .search-wrap {
   display: flex;
-  gap: 10px;
-  margin-bottom: 25px;
+  gap: 12px;
+  margin-bottom: 35px;
 }
 
-input {
+.search-wrap input {
   flex: 1;
-  padding: 14px 20px;
-  border-radius: 15px;
-  border: none;
-  background: rgba(255,255,255,0.2);
-  color: white;
+  padding: 16px 22px;
+  border-radius: 20px;
+  border: 1px solid var(--glass-border);
+  background: rgba(255,255,255,0.05);
+  color: #fff;
   font-size: 16px;
   outline: none;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
-input::placeholder { color: rgba(255,255,255,0.7); }
+.search-wrap input:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 40px rgba(139, 92, 246, 0.5);
+  transform: scale(1.02);
+}
 
-.btn {
-  padding: 14px;
-  border-radius: 15px;
+.search-wrap button {
+  padding: 16px 20px;
+  border-radius: 20px;
   border: none;
-  background: white;
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
   cursor: pointer;
-  font-size: 20px;
+  font-size: 22px;
+  transition: all 0.3s;
 }
+.search-wrap button:active { transform: scale(0.88); }
 
-.main {
+.hero {
   text-align: center;
-  color: white;
+  margin-bottom: 40px;
+  animation: fadeUp 1s 0.3s both;
 }
 
-.temp { font-size: 90px; font-weight: 700; line-height: 1; }
-.city { font-size: 24px; margin: 5px 0; }
-.time { font-size: 18px; opacity: 0.8; margin-bottom: 15px; }
-.desc { font-size: 18px; opacity: 0.9; text-transform: capitalize; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
-.details {
+.temp {
+  font-size: 120px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #fff 0%, #c4b5fd 50%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 0.85;
+  filter: drop-shadow(0 0 40px rgba(139, 92, 246, 0.4));
+}
+
+.city { font-size: 26px; font-weight: 600; margin: 12px 0 6px; }
+.time { font-size: 16px; color: var(--subtext); }
+.desc { font-size: 20px; color: #d4d4d8; margin-top: 10px; text-transform: capitalize; }
+
+.weather-icon {
+  font-size: 90px;
+  margin: 20px 0;
+  animation: float 4s ease-in-out infinite;
+  filter: drop-shadow(0 0 30px rgba(255,255,255,0.3));
+}
+
+@keyframes float {
+ 0%, 100% { transform: translateY(0) rotate(0deg); }
+ 50% { transform: translateY(-15px) rotate(5deg); }
+}
+
+.stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 15px;
-  margin-top: 30px;
+  margin: 35px 0;
 }
 
-.detail-box {
-  background: rgba(255,255,255,0.15);
-  padding: 15px;
-  border-radius: 15px;
+.stat-card {
+  padding: 20px 14px;
+  border-radius: 22px;
   text-align: center;
-  color: white;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
 }
-.detail-box div:first-child { font-size: 13px; opacity: 0.8; }
-.detail-box div:last-child { font-size: 20px; font-weight: 600; margin-top: 5px; }
+.stat-card:nth-child(1) { background: linear-gradient(135deg, rgba(59,130,246,0.3), rgba(6,182,212,0.3)); }
+.stat-card:nth-child(2) { background: linear-gradient(135deg, rgba(236,72,153,0.3), rgba(244,63,94,0.3)); }
+.stat-card:nth-child(3) { background: linear-gradient(135deg, rgba(16,185,129,0.3), rgba(20,184,166,0.3)); }
 
-.forecast {
-  margin-top: 25px;
-  background: rgba(255,255,255,0.15);
-  padding: 20px;
-  border-radius: 15px;
-  color: white;
+.stat-label { font-size: 12px; opacity: 0.7; }
+.stat-value { font-size: 24px; font-weight: 700; margin-top: 8px; }
+
+.glass-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 26px;
+  padding: 24px;
+  margin-bottom: 18px;
+  animation: fadeUp 1s 0.5s both;
 }
-.forecast h3 { margin-bottom: 15px; font-size: 16px; opacity: 0.9; }
-.day {
+
+.card-title {
+  font-size: 14px;
+  color: var(--subtext);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+#temp-chart {
+  width: 100%;
+  height: 120px;
+  margin-top: 10px;
+}
+
+.hourly {
   display: flex;
-  justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  gap: 22px;
+  overflow-x: auto;
+  padding: 10px 5px;
+  scrollbar-width: none;
 }
-.day:last-child { border-bottom: none; }
+.hourly::-webkit-scrollbar { display: none; }
 
-.loader { text-align: center; color: white; padding: 40px 0; font-size: 18px; }
-.error { text-align: center; color: #ffcccc; padding: 40px 0; }
+.hour {
+  min-width: 70px;
+  text-align: center;
+  transition: transform 0.3s;
+}
+.hour:hover { transform: scale(1.1); }
+.hour-time { font-size: 12px; color: var(--subtext); }
+.hour-temp { font-size: 20px; font-weight: 600; margin-top: 10px; }
+
+.aqi-bar {
+  height: 8px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #10b981, #fbbf24, #f97316, #ef4444);
+  margin: 15px 0;
+  position: relative;
+}
+.aqi-indicator {
+  position: absolute;
+  top: -6px;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(255,255,255,0.5);
+  transition: left 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.loader {
+  text-align: center;
+  padding: 90px 0;
+  color: var(--subtext);
+  font-size: 17px;
+}
+.pulse { animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 </style>
 </head>
 <body>
+<canvas id="weather-canvas"></canvas>
+
 <div class="app">
   <div class="search-wrap">
-    <input type="text" id="search" placeholder="Search city...">
-    <button class="btn" id="locBtn">📍</button>
+    <input type="text" id="search" placeholder="Search any city...">
+    <button id="locBtn">📍</button>
   </div>
 
   <div id="content">
-    <div class="loader">Search a city or use location</div>
+    <div class="loader pulse">Search a city or use location</div>
   </div>
 </div>
 
@@ -120,95 +236,241 @@ const API_KEY = "c8a4bc4d3c964a22098e0e4f979f0a9a";
 const search = document.getElementById('search');
 const locBtn = document.getElementById('locBtn');
 const content = document.getElementById('content');
+const canvas = document.getElementById('weather-canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+let currentWeather = 'Clear';
+
+// Dynamic weather background system
+function initParticles(weather) {
+  particles = [];
+  currentWeather = weather;
+
+  const count = weather === 'Rain' || weather === 'Snow'? 150 : 80;
+  const type = weather === 'Snow'? 'snow' : weather === 'Rain'? 'rain' : 'star';
+
+  for(let i=0; i<count; i++){
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: type === 'rain'? 0 : (Math.random() - 0.5) * 1,
+      vy: type === 'rain'? 5 + Math.random() * 3 : type === 'snow'? 1 + Math.random() * 2 : (Math.random() - 0.5) * 0.5,
+      r: type === 'star'? Math.random() * 2 + 1 : type === 'snow'? Math.random() * 4 + 2 : 2,
+      opacity: Math.random()
+    });
+  }
+
+  // Change background gradient based on weather
+  const gradients = {
+    Clear: 'linear-gradient(135deg, #1e3a8a, #0f172a)',
+    Clouds: 'linear-gradient(135deg, #374151, #111827)',
+    Rain: 'linear-gradient(135deg, #1e40af, #0c4a6e)',
+    Snow: 'linear-gradient(135deg, #e2e8f0, #94a3b8)',
+    Thunderstorm: 'linear-gradient(135deg, #450a0a, #0f172a)'
+  };
+  document.body.style.background = gradients[weather] || gradients.Clear;
+}
+
+function animateWeather(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  if(currentWeather === 'Clear'){
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+  } else if(currentWeather === 'Rain'){
+    ctx.fillStyle = 'rgba(148, 163, 184, 0.6)';
+  } else {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+  }
+
+  particles.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+
+    if(p.y > canvas.height) p.y = -10;
+    if(p.x < 0) p.x = canvas.width;
+    if(p.x > canvas.width) p.x = 0;
+
+    ctx.globalAlpha = p.opacity;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  });
+
+  requestAnimationFrame(animateWeather);
+}
+animateWeather();
+
+window.onresize = () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+};
+
+// Haptic feedback for mobile
+function haptic(){
+  if(navigator.vibrate) navigator.vibrate(50);
+}
 
 search.addEventListener('keypress', e => {
-  if (e.key === 'Enter' && search.value) getWeatherByCity(search.value);
+  if (e.key === 'Enter' && search.value) {
+    haptic();
+    getWeather(search.value);
+  }
 });
 
-locBtn.addEventListener('click', getLocationWeather);
-
-function getLocationWeather() {
-  if (!navigator.geolocation) {
-    alert("Location not supported");
-    return;
-  }
-  content.innerHTML = '<div class="loader">Getting location...</div>';
+locBtn.onclick = () => {
+  haptic();
+  content.innerHTML = '<div class="loader pulse">Getting location...</div>';
   navigator.geolocation.getCurrentPosition(pos => {
     getWeatherByCoords(pos.coords.latitude, pos.coords.longitude);
   }, () => {
-    content.innerHTML = '<div class="error">Location denied</div>';
+    content.innerHTML = '<div class="loader">Location denied</div>';
   });
-}
+};
 
-async function getWeatherByCity(city) {
-  content.innerHTML = '<div class="loader">Loading...</div>';
+async function getWeather(city) {
+  content.innerHTML = '<div class="loader pulse">Loading...</div>';
   try {
     const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`);
     const data = await res.json();
     if (data.cod!== 200) throw new Error();
-    showWeather(data);
+    render(data);
   } catch {
-    content.innerHTML = '<div class="error">City not found</div>';
+    content.innerHTML = '<div class="loader">City not found</div>';
   }
 }
 
 async function getWeatherByCoords(lat, lon) {
   const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`);
   const data = await res.json();
-  showWeather(data);
+  render(data);
 }
 
-function showWeather(data) {
+async function render(data) {
   const localTime = getLocalTime(data.timezone);
-  const forecast = getForecast(data.coord.lat, data.coord.lon);
+  initParticles(data.weather[0].main);
+
+  // Get air quality
+  const aqiRes = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${data.coord.lat}&lon=${data.coord.lon}&appid=${API_KEY}`);
+  const aqiData = await aqiRes.json();
+  const aqi = aqiData.list[0].main.aqi;
 
   content.innerHTML = `
-    <div class="main">
+    <div class="hero">
       <div class="temp">${Math.round(data.main.temp)}°</div>
-      <div class="city">${data.name}, ${data.sys.country}</div>
+      <div class="city">📍 ${data.name}, ${data.sys.country}</div>
       <div class="time">${localTime}</div>
+      <div class="weather-icon">${getIcon(data.weather[0].main)}</div>
       <div class="desc">${data.weather[0].description}</div>
     </div>
 
-    <div class="details">
-      <div class="detail-box"><div>Wind</div><div>${data.wind.speed} km/h</div></div>
-      <div class="detail-box"><div>Humidity</div><div>${data.main.humidity}%</div></div>
-      <div class="detail-box"><div>Feels</div><div>${Math.round(data.main.feels_like)}°</div></div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Wind</div>
+        <div class="stat-value">${data.wind.speed} km/h</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Humidity</div>
+        <div class="stat-value">${data.main.humidity}%</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pressure</div>
+        <div class="stat-value">${data.main.pressure}</div>
+      </div>
     </div>
 
-    <div class="forecast" id="forecast">
-      <h3>5-Day Forecast</h3>
-      <div class="loader">Loading forecast...</div>
+    <div class="glass-card">
+      <div class="card-title">Air Quality</div>
+      <div class="aqi-bar">
+        <div class="aqi-indicator" style="left: ${aqi * 20 - 10}%"></div>
+      </div>
+      <div style="font-size: 18px; font-weight: 600;">${['Good', 'Fair', 'Moderate', 'Poor', 'Very Poor'][aqi-1]}</div>
+    </div>
+
+    <div class="glass-card">
+      <div class="card-title">24h Temperature</div>
+      <canvas id="temp-chart"></canvas>
+    </div>
+
+    <div class="glass-card">
+      <div class="card-title">Hourly Forecast</div>
+      <div class="hourly" id="hourly"></div>
+    </div>
+
+    <div class="glass-card">
+      <div class="card-title">7-Day Forecast</div>
+      <div id="forecast"></div>
     </div>
   `;
 
-  forecast.then(renderForecast);
+  loadHourly(data.coord.lat, data.coord.lon);
+  loadForecast(data.coord.lat, data.coord.lon);
+  drawTempChart(data.coord.lat, data.coord.lon);
 }
 
-async function getForecast(lat, lon) {
+function drawTempChart(lat, lon){
+  fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`)
+ .then(r => r.json())
+ .then(data => {
+    const temps = data.list.slice(0, 8).map(h => h.main.temp);
+    const canvas = document.getElementById('temp-chart');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth;
+    canvas.height = 120;
+
+    ctx.strokeStyle = '#8b5cf6';
+    ctx.lineWidth = 3;
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = '#8b5cf6';
+
+    ctx.beginPath();
+    temps.forEach((temp, i) => {
+      const x = (i / (temps.length - 1)) * canvas.width;
+      const y = canvas.height - ((temp - Math.min(...temps)) / (Math.max(...temps) - Math.min(...temps))) * canvas.height;
+      if(i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  });
+}
+
+async function loadHourly(lat, lon) {
+  const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`);
+  const data = await res.json();
+  const hourly = data.list.slice(0, 12);
+  document.getElementById('hourly').innerHTML = hourly.map(h => `
+    <div class="hour">
+      <div class="hour-time">${new Date(h.dt*1000).getHours()}:00</div>
+      <div style="font-size: 36px;">${getIcon(h.weather[0].main)}</div>
+      <div class="hour-temp">${Math.round(h.main.temp)}°</div>
+    </div>
+  `).join('');
+}
+
+async function loadForecast(lat, lon) {
   const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`);
   const data = await res.json();
   const days = {};
   data.list.forEach(item => {
     const date = new Date(item.dt * 1000).toLocaleDateString('en', {weekday: 'short'});
-    if (!days[date]) days[date] = {date, max: -100, min: 100, icon: item.weather[0].icon};
+    if (!days[date]) days[date] = {date, max: -100, min: 100, pop: 0, icon: item.weather[0].main};
     days[date].max = Math.max(days[date].max, item.main.temp_max);
     days[date].min = Math.min(days[date].min, item.main.temp_min);
+    days[date].pop = Math.max(days[date].pop, item.pop * 100);
   });
-  return Object.values(days).slice(0, 5);
-}
 
-function renderForecast(days) {
-  document.getElementById('forecast').innerHTML = `
-    <h3>5-Day Forecast</h3>
-    ${days.map(d => `
-      <div class="day">
-        <div>${d.date}</div>
-        <div><img src="https://openweathermap.org/img/wn/${d.icon}@2x.png" width="40"></div>
-        <div>${Math.round(d.max)}° / ${Math.round(d.min)}°</div>
-      </div>
-    `).join('')}
-  `;
+  document.getElementById('forecast').innerHTML = Object.values(days).slice(0, 7).map(d => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+      <div style="flex:1; font-weight:600;">${d.date}</div>
+      <div style="font-size: 30px;">${getIcon(d.icon)}</div>
+      <div style="color:var(--subtext);">${Math.round(d.pop)}%</div>
+      <div style="font-weight:600; min-width:90px; text-align:right;">${Math.round(d.max)}° / ${Math.round(d.min)}°</div>
+    </div>
+  `).join('');
 }
 
 function getLocalTime(offset) {
@@ -217,6 +479,11 @@ function getLocalTime(offset) {
   const local = new Date(utc + offset * 1000);
   return local.toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit', hour12: true});
 }
+
+function getIcon(weather) {
+  const icons = { Clear: '☀️', Clouds: '☁️', Rain: '🌧️', Snow: '❄️', Thunderstorm: '⛈️', Drizzle: '🌦️', Mist: '🌫️' };
+  return icons[weather] || '🌤️';
+}
 </script>
 </body>
-</html>
+      </html>
