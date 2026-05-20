@@ -3,98 +3,149 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Voice Lock</title>
+<title>Modern Weather</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-    text-align: center;
-  }
- .box {
-    background: rgba(255,255,255,0.1);
-    padding: 40px;
-    border-radius: 20px;
-    backdrop-filter: blur(10px);
-  }
-  button {
-    padding: 15px 30px;
-    font-size: 18px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    background: white;
-    color: #667eea;
-    margin-top: 20px;
-  }
- .status {
-    margin-top: 20px;
-    font-size: 20px;
-  }
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+:root {
+  --bg: #0f172a;
+  --card: #1e293b;
+  --text: #f1f5f9;
+  --subtext: #94a3b8;
+  --accent2: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.container {
+  width: 100%;
+  max-width: 420px;
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(20px);
+  border-radius: 30px;
+  padding: 25px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.search-box {
+  width: 100%;
+  padding: 12px 20px;
+  border-radius: 15px;
+  border: none;
+  background: rgba(255,255,255,0.05);
+  color: var(--text);
+  font-size: 16px;
+  outline: none;
+}
+
+.main-temp { text-align: center; margin: 30px 0; }
+.temp { font-size: 80px; font-weight: 700; background: var(--accent2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.city { font-size: 20px; color: var(--subtext); margin-top: -10px; }
+.weather-icon { font-size: 60px; margin: 10px 0; }
+
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 25px 0; }
+.card { background: var(--accent2); padding: 15px; border-radius: 20px; text-align: center; }
+.card-label { font-size: 12px; opacity: 0.8; }
+.card-value { font-size: 18px; font-weight: 600; margin-top: 5px; }
+
+.section { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; margin-bottom: 15px; }
+.section-title { font-size: 14px; color: var(--subtext); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+
+.hourly { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; }
+.hour { min-width: 60px; text-align: center; }
+
+.forecast-day { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.forecast-day:last-child { border-bottom: none; }
+.loader { text-align: center; padding: 50px 0; color: var(--subtext); }
 </style>
 </head>
 <body>
-
-<div class="box">
-  <h1>🔒 Voice Lock</h1>
-  <p>"Open" ya "Zia" bolo site unlock karne ke liye</p>
-  <button id="startBtn">🎤 Mic On Karo</button>
-  <div class="status" id="status">Mic band hai</div>
+<div class="container">
+  <div class="header">
+    <input type="text" class="search-box" id="search" placeholder="Search city...">
+  </div>
+  <div id="content" class="loader">Search for a city to start</div>
 </div>
 
 <script>
-const status = document.getElementById('status');
-const startBtn = document.getElementById('startBtn');
-const SECRET_WORD = "open"; // Yahan apna password word likh do
+const API_KEY = "c8a4bc4d3c964a22098e0e4f979f0a9a";
+const searchBox = document.getElementById('search');
+const content = document.getElementById('content');
 
-// Check if browser supports speech recognition
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+searchBox.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter' && searchBox.value) getWeather(searchBox.value);
+});
 
-if (!SpeechRecognition) {
-  status.textContent = "Tumhara browser voice support nahi karta. Chrome use karo.";
-  startBtn.disabled = true;
-} else {
-  const recognition = new SpeechRecognition();
-  recognition.lang = 'en-US'; // Urdu ke liye 'ur-PK' try kar sakte ho
-  recognition.continuous = false;
-  recognition.interimResults = false;
+async function getWeather(city) {
+  content.innerHTML = '<div class="loader">Loading...</div>';
+  try {
+    const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}&units=metric`);
+    const data = await res.json();
+    if (data.cod!== '200') throw new Error(data.message);
+    displayWeather(data);
+  } catch (err) {
+    content.innerHTML = `<div class="loader">City not found 😢</div>`;
+  }
+}
 
-  startBtn.addEventListener('click', () => {
-    recognition.start();
-    status.textContent = "Sun raha hun... bolo";
+function displayWeather(data) {
+  const current = data.list[0];
+  const hourly = data.list.slice(0, 8);
+  const daily = getDailyForecast(data.list);
+
+  content.innerHTML = `
+    <div class="main-temp">
+      <div class="temp">${Math.round(current.main.temp)}°</div>
+      <div class="city">${data.city.name}</div>
+      <div class="weather-icon">${getIcon(current.weather[0].main)}</div>
+      <div>${current.weather[0].description}</div>
+    </div>
+
+    <div class="cards">
+      <div class="card"><div class="card-label">Wind</div><div class="card-value">${current.wind.speed} km/h</div></div>
+      <div class="card"><div class="card-label">Humidity</div><div class="card-value">${current.main.humidity}%</div></div>
+      <div class="card"><div class="card-label">Pressure</div><div class="card-value">${current.main.pressure} hPa</div></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Hourly Forecast</div>
+      <div class="hourly">
+        ${hourly.map(h => `<div class="hour"><div>${new Date(h.dt*1000).getHours()}:00</div><div>${getIcon(h.weather[0].main)}</div><div>${Math.round(h.main.temp)}°</div></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">5-Day Forecast</div>
+      ${daily.map(d => `<div class="forecast-day"><div>${d.day}</div><div>${getIcon(d.weather)}</div><div>${Math.round(d.max)}° / ${Math.round(d.min)}°</div></div>`).join('')}
+    </div>
+  `;
+}
+
+function getDailyForecast(list) {
+  const days = {};
+  list.forEach(item => {
+    const day = new Date(item.dt*1000).toLocaleDateString('en', {weekday: 'short'});
+    if (!days[day]) days[day] = {day, max: -100, min: 100, weather: item.weather[0].main};
+    days[day].max = Math.max(days[day].max, item.main.temp_max);
+    days[day].min = Math.min(days[day].min, item.main.temp_min);
   });
+  return Object.values(days).slice(0, 5);
+}
 
-  recognition.onresult = (event) => {
-    const transcript = event.results[0][0].transcript.toLowerCase();
-    status.textContent = `Tumne bola: "${transcript}"`;
-
-    if (transcript.includes(SECRET_WORD)) {
-      status.textContent = "✅ Sahi! Unlock ho gaya";
-      document.body.style.background = "linear-gradient(135deg, #00c9ff, #92fe9d)";
-
-      // 2 sec baad dashboard par le jao
-      setTimeout(() => {
-        window.location.href = "dashboard.html";
-      }, 2000);
-    } else {
-      status.textContent = "❌ Galat word. Dobara try karo";
-    }
-  };
-
-  recognition.onerror = (event) => {
-    status.textContent = "Error: " + event.error;
-  };
-
-  recognition.onend = () => {
-    startBtn.textContent = "🎤 Dobara Try Karo";
-  };
+function getIcon(weather) {
+  const icons = { Clear: '☀️', Clouds: '☁️', Rain: '🌧️', Snow: '❄️', Thunderstorm: '⛈️', Drizzle: '🌦️', Mist: '🌫️' };
+  return icons[weather] || '🌤️';
 }
 </script>
-
 </body>
-  </html>
+</html>
